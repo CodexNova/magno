@@ -163,30 +163,27 @@ export function App() {
     });
   }, []);
 
-  useEffect(
-    () => {
-      if (!term || term.length === 0) {
-        return null;
+  useEffect(() => {
+    if (!term || term.length === 0) {
+      return null;
+    }
+
+    setLoading(true);
+    setResults([]);
+
+    search(term).then(results => {
+      setResults(results);
+      setLoading(false);
+
+      if (NODE_ENV === "production") {
+        ReactGA.event({
+          category: "User",
+          action: "Search",
+          label: term,
+        });
       }
-
-      setLoading(true);
-      setResults([]);
-
-      search(term).then(results => {
-        setResults(results);
-        setLoading(false);
-
-        if (NODE_ENV === "production") {
-          ReactGA.event({
-            category: "User",
-            action: "Search",
-            label: term,
-          });
-        }
-      });
-    },
-    [term]
-  );
+    });
+  }, [term]);
 
   return (
     <React.Fragment>
@@ -242,7 +239,9 @@ export function App() {
 }
 
 function search(term) {
-  return fetch(`/.netlify/functions/magno?q=${term}`).then(response => {
+  const url = `/.netlify/functions/magno-api?q=${term}`;
+
+  return fetch(url).then(response => {
     console.log(`response ${response}`);
     return response.json();
   });
