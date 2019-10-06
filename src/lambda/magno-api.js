@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { API_U, API_P } = process.env;
-console.log({ API_U, API_P });
 
 export function handler(event, context, callback) {
   const searchStr = event.queryStringParameters["q"];
