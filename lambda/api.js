@@ -6,8 +6,12 @@ dotenv.config();
 
 const { API_U, API_P } = process.env;
 
-export function handler(event, context, callback) {
-  const searchStr = event.queryStringParameters["q"];
+exports.handler = function handler(event, context, callback) {
+  const searchStr = event.queryStringParameters["keyword"];
+
+  if (!searchStr) {
+    return callback(null, { contentType: "text/plain", statusCode: 400, body: "Naaah mate" });
+  }
 
   fetch(`https://chill.institute/api/v1/search?keyword=${searchStr}`, {
     method: "GET",
@@ -31,4 +35,4 @@ export function handler(event, context, callback) {
       });
     })
     .catch(error => console.log(`error ${error}`));
-}
+};

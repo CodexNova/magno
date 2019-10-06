@@ -241,8 +241,7 @@ export function App() {
 }
 
 function search(term) {
-  // const url = `https://chill.institute/api/v1/search?keyword=${term}&indexer=rarbg`;
-  const url = `/.netlify/functions/magno-api?q=${term}`;
+  const url = `/.netlify/functions/api?keyword=${term}`;
 
   return fetch(url)
     .then(response => response.json())
