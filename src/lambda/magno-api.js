@@ -1,15 +1,29 @@
-import lime from "./lib/lime.js";
-import eztv from "./lib/eztv.js";
+var fetch = require("node-fetch");
+var encode = require("base-64").encode;
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+const { API_U, API_P } = process.env;
+console.log({ API_U, API_P });
 
 export function handler(event, context, callback) {
   const searchStr = event.queryStringParameters["q"];
 
-  Promise.all([lime.search(searchStr), eztv.search(searchStr)])
+  fetch(`https://chill.institute/api/v1/search?keyword=${searchStr}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${encode(`${API_U}:${API_P}`)}`,
+    },
+  })
+    .then(res => res.json())
     .then(results => {
+      console.log("Results from magno-api 👇");
       console.log(results);
-
+      console.log("");
       const allResults = [].concat(...results);
-      const sortedResults = allResults.sort((a, b) => b.seeds - a.seeds);
+      const sortedResults = allResults.sort((a, b) => b.peers - a.peers);
 
       callback(null, {
         contentType: "text/json",

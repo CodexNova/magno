@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import qs from "qs";
+import pretty from "prettysize";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Confetti from "react-dom-confetti";
 import { File, User, Activity, Clock } from "react-bytesize-icons";
@@ -30,7 +31,8 @@ const Title = styled.p`
   a {
     text-decoration: none;
 
-    &:hover {
+    &:hover,
+    &:focus {
       text-decoration: underline;
     }
   }
@@ -62,34 +64,35 @@ const CopyButton = styled.button`
   margin-left: 15px;
   line-height: 1;
   padding: 5px 10px;
+  white-space: nowrap;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background: white;
     color: #212123;
   }
 `;
 
-function ResultItem({ result, token }) {
+function ResultItem({ magnetUri, title, size, peers, publishDate, tracker, token }) {
   const [copied, setCopied] = useState(false);
   const [added, setAdded] = useState(false);
 
-  useEffect(
-    () => {
-      if (!copied) {
-        return null;
-      }
+  useEffect(() => {
+    if (!copied) {
+      return null;
+    }
 
-      setTimeout(() => {
-        setCopied(false);
-      }, 4000);
-    },
-    [copied]
-  );
+    setTimeout(() => {
+      setCopied(false);
+    }, 4000);
+  }, [copied]);
 
   return (
     <Item>
       <Title>
-        <a href={result.magnet}>{result.title}</a>
+        <a href={magnetUri} title={`Magnet uri: ${title}`}>
+          {title}
+        </a>
         {token && (
           <CopyButton
             copied={added}
@@ -97,7 +100,7 @@ function ResultItem({ result, token }) {
               if (added) {
                 window.location = "https://app.put.io/transfers";
               } else {
-                addTransfer(token, result.magnet).then(
+                addTransfer(token, magnetUri).then(
                   response => response.status === 200 && setAdded(true)
                 );
               }
@@ -109,7 +112,7 @@ function ResultItem({ result, token }) {
           </CopyButton>
         )}
         {!token && (
-          <CopyToClipboard text={result.magnet} onCopy={() => setCopied(true)}>
+          <CopyToClipboard text={magnetUri} onCopy={() => setCopied(true)}>
             <CopyButton copied={copied}>
               <Confetti active={copied} config={config} />
               {!copied && <span>Copy</span>}
@@ -121,16 +124,16 @@ function ResultItem({ result, token }) {
 
       <Info>
         <Meta>
-          <Activity width={16} height={16} /> {result.seeds}
+          <Activity width={16} height={16} /> {peers}
         </Meta>
         <Meta>
-          <File width={16} height={16} /> {result.size}
+          <File width={16} height={16} /> {size}
         </Meta>
         <Meta>
-          <Clock width={16} height={16} /> {result.date_added}
+          <Clock width={16} height={16} /> {publishDate}
         </Meta>
         <Meta>
-          <User width={16} height={16} /> {result.source}
+          <User width={16} height={16} /> {tracker}
         </Meta>
       </Info>
     </Item>
@@ -138,13 +141,22 @@ function ResultItem({ result, token }) {
 }
 
 export function ResultsBox({ results, token }) {
-  if (!results) {
-    return null;
+  if (!results || results.length === 0) {
+    return <Title>No results</Title>;
   }
   return (
     <List>
-      {results.map(result => (
-        <ResultItem key={result.magnet} result={result} token={token} />
+      {results.map(({ id, link, title, size, peers, source, upload_time }) => (
+        <ResultItem
+          key={id}
+          magnetUri={link}
+          title={title}
+          size={pretty(size)}
+          peers={peers}
+          tracker={source}
+          publishDate={new Date(upload_time).toLocaleDateString()}
+          token={token}
+        />
       ))}
     </List>
   );

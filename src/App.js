@@ -9,9 +9,7 @@ import { GitHub, Info, Close } from "react-bytesize-icons";
 
 const { NODE_ENV, REACT_APP_PUTIO_CLIENT_ID } = process.env;
 
-const PUTIO_URL = `https://api.put.io/v2/oauth2/authenticate?client_id=${REACT_APP_PUTIO_CLIENT_ID}&response_type=token&redirect_uri=${
-  window.location.origin
-}`;
+const PUTIO_URL = `https://api.put.io/v2/oauth2/authenticate?client_id=${REACT_APP_PUTIO_CLIENT_ID}&response_type=token&redirect_uri=${window.location.origin}`;
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -21,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
 
 	body {
 		font-family: "Andale Mono", Consolas, "Courier New", monospaced;
-		max-width: 960px;
+		max-width: 840px;
 		margin: 0 auto;
 		padding: 30px;
 		background-color: #212123;
@@ -113,7 +111,8 @@ const Link = styled.a`
   padding: 5px 7px;
   line-height: 1;
 
-  &:hover {
+  &:hover,
+  &:focus {
     color: #ffffff;
   }
 `;
@@ -144,7 +143,7 @@ if (putioToken) {
 
 export function App() {
   const [term, setTerm] = useState();
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [token, setToken] = useLocalStorage("token", putioToken);
@@ -169,20 +168,24 @@ export function App() {
     }
 
     setLoading(true);
-    setResults([]);
+    setResults(undefined);
 
-    search(term).then(results => {
-      setResults(results);
-      setLoading(false);
+    search(term)
+      .then(results => {
+        console.log("Results received");
+        console.log(results);
+        setResults(results);
+        setLoading(false);
 
-      if (NODE_ENV === "production") {
-        ReactGA.event({
-          category: "User",
-          action: "Search",
-          label: term,
-        });
-      }
-    });
+        if (NODE_ENV === "production") {
+          ReactGA.event({
+            category: "User",
+            action: "Search",
+            label: term,
+          });
+        }
+      })
+      .catch(error => console.log(error));
   }, [term]);
 
   return (
@@ -222,8 +225,7 @@ export function App() {
             <a href="https://twitter.com/philhawksworth" rel="nofollow">
               Phil Hawksowrth
             </a>
-            . Lib forked from <a href="https://github.com/ItzBlitz98/torrentflix">torrentflix</a>.
-            Magnet icon by{" "}
+            . Magnet icon by{" "}
             <a href="https://thenounproject.com/search/?q=magnet&amp;i=33272">Matt Brooks</a>
           </p>
           <p>
@@ -232,17 +234,17 @@ export function App() {
         </InfoBox>
       )}
       <SearchBox onSubmit={term => setTerm(term)} />
-      <ResultsBox results={results} token={token} />
+      {results && <ResultsBox results={results} token={token} />}
       <GlobalStyle />
     </React.Fragment>
   );
 }
 
 function search(term) {
+  // const url = `https://chill.institute/api/v1/search?keyword=${term}&indexer=rarbg`;
   const url = `/.netlify/functions/magno-api?q=${term}`;
 
-  return fetch(url).then(response => {
-    console.log(`response ${response}`);
-    return response.json();
-  });
+  return fetch(url)
+    .then(response => response.json())
+    .catch(error => console.log("error"));
 }

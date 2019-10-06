@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "base-64": "^0.1.0",
+    "prettysize": "^2.0.0",
     "qs": "^6.6.0",
     "react": "^16.7.0-alpha",
     "react-bytesize-icons": "^0.8.3",
