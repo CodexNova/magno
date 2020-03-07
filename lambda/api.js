@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { API_U, API_P } = process.env;
+console.log(process.env);
+console.log({ API_U, API_P });
 
 exports.handler = function handler(event, context, callback) {
   const searchStr = event.queryStringParameters["keyword"];
@@ -13,26 +15,29 @@ exports.handler = function handler(event, context, callback) {
     return callback(null, { contentType: "text/plain", statusCode: 400, body: "Naaah mate" });
   }
 
-  fetch(`https://chill.institute/api/v1/search?keyword=${searchStr}`, {
+  const opts = {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Basic ${encode(`${API_U}:${API_P}`)}`,
     },
-  })
-    .then(res => res.json())
-    .then(results => {
-      console.log("Results from magno-api 👇");
-      console.log(results);
-      console.log("");
-      const allResults = [].concat(...results);
-      const sortedResults = allResults.sort((a, b) => b.peers - a.peers);
+  };
 
-      callback(null, {
-        contentType: "text/json",
-        statusCode: 200,
-        body: JSON.stringify(sortedResults),
-      });
-    })
-    .catch(error => console.log(`error ${error}`));
+  const urls = [
+    `https://chill.institute/api/v1/search?keyword=${searchStr}&indexer=1337x`,
+    `https://chill.institute/api/v1/search?keyword=${searchStr}&indexer=rarbg`,
+  ];
+
+  const allRequests = urls.map(url => fetch(url, opts).then(response => response.json()));
+
+  Promise.all(allRequests).then(results => {
+    const allResults = [].concat(...results);
+    const sortedResults = allResults.sort((a, b) => b.peers - a.peers);
+
+    callback(null, {
+      contentType: "text/json",
+      statusCode: 200,
+      body: JSON.stringify(sortedResults),
+    });
+  });
 };

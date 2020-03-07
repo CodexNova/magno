@@ -171,10 +171,9 @@ export function App() {
     setResults(undefined);
 
     search(term)
-      .then(results => {
-        console.log("Results received");
-        console.log(results);
-        setResults(results);
+      .then(newResults => {
+        setResults(newResults);
+
         setLoading(false);
 
         if (NODE_ENV === "production") {
