@@ -5,11 +5,17 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { API_U, API_P } = process.env;
-console.log(process.env);
-console.log({ API_U, API_P });
 
 exports.handler = function handler(event, context, callback) {
-  const searchStr = event.queryStringParameters["keyword"];
+  if (process.env === "production" && event.referer.host !== "magno.netlify.app") {
+    return callback(null, {
+      contentType: "text/plain",
+      statusCode: 400,
+      body: "Naaah mate",
+    });
+  }
+
+  const searchStr = event.queryStringParameters["term"];
 
   if (!searchStr) {
     return callback(null, { contentType: "text/plain", statusCode: 400, body: "Naaah mate" });
@@ -26,6 +32,7 @@ exports.handler = function handler(event, context, callback) {
   const urls = [
     `https://chill.institute/api/v1/search?keyword=${searchStr}&indexer=1337x`,
     `https://chill.institute/api/v1/search?keyword=${searchStr}&indexer=rarbg`,
+    `https://chill.institute/api/v1/search?keyword=${searchStr}&indexer=yts`,
   ];
 
   const allRequests = urls.map(url => fetch(url, opts).then(response => response.json()));

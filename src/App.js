@@ -9,7 +9,9 @@ import { GitHub, Info, Close } from "react-bytesize-icons";
 
 const { NODE_ENV, REACT_APP_PUTIO_CLIENT_ID } = process.env;
 
-const PUTIO_URL = `https://api.put.io/v2/oauth2/authenticate?client_id=${REACT_APP_PUTIO_CLIENT_ID}&response_type=token&redirect_uri=${window.location.origin}`;
+const PUTIO_URL = `https://api.put.io/v2/oauth2/authenticate?client_id=${REACT_APP_PUTIO_CLIENT_ID}&response_type=token&redirect_uri=${
+  window.location.origin
+}`;
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -162,30 +164,33 @@ export function App() {
     });
   }, []);
 
-  useEffect(() => {
-    if (!term || term.length === 0) {
-      return null;
-    }
+  useEffect(
+    () => {
+      if (!term || term.length === 0) {
+        return null;
+      }
 
-    setLoading(true);
-    setResults(undefined);
+      setLoading(true);
+      setResults(undefined);
 
-    search(term)
-      .then(newResults => {
-        setResults(newResults);
+      search(term)
+        .then(newResults => {
+          setResults(newResults);
 
-        setLoading(false);
+          setLoading(false);
 
-        if (NODE_ENV === "production") {
-          ReactGA.event({
-            category: "User",
-            action: "Search",
-            label: term,
-          });
-        }
-      })
-      .catch(error => console.log(error));
-  }, [term]);
+          if (NODE_ENV === "production") {
+            ReactGA.event({
+              category: "User",
+              action: "Search",
+              label: term,
+            });
+          }
+        })
+        .catch(error => console.log(error));
+    },
+    [term]
+  );
 
   return (
     <React.Fragment>
@@ -240,7 +245,7 @@ export function App() {
 }
 
 function search(term) {
-  const url = `/.netlify/functions/api?keyword=${term}`;
+  const url = `/.netlify/functions/x?term=${term}`;
 
   return fetch(url)
     .then(response => response.json())
