@@ -7,9 +7,7 @@ dotenv.config();
 const { API_U, API_P } = process.env;
 
 exports.handler = function handler(event, context, callback) {
-  console.log("process", process.env);
-  console.log("event", event);
-  if (process.env === "production" && event.referer.host !== "magno.netlify.app") {
+  if (event.headers.referer !== "https://magno.netlify.app/") {
     return callback(null, {
       contentType: "text/plain",
       statusCode: 400,
