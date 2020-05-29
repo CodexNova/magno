@@ -7,6 +7,7 @@ dotenv.config();
 const { API_U, API_P } = process.env;
 
 exports.handler = function handler(event, context, callback) {
+  console.log("event.headers.referer", event.headers.referer);
   if (event.headers.referer !== "https://magno.netlify.app/") {
     return callback(null, {
       contentType: "text/plain",
@@ -20,6 +21,8 @@ exports.handler = function handler(event, context, callback) {
   if (!searchStr) {
     return callback(null, { contentType: "text/plain", statusCode: 400, body: "Naaah mate" });
   }
+
+  console.log("searchStr", searchStr);
 
   const opts = {
     method: "GET",
