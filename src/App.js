@@ -245,7 +245,7 @@ export function App() {
 }
 
 function search(term) {
-  const url = `/.netlify/functions/x?term=${term}`;
+  const url = `/.netlify/functions/stop?term=${term}`;
 
   return fetch(url)
     .then(response => response.json())
