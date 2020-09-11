@@ -35,6 +35,6 @@
     "babel-loader": "^8.0.4",
     "http-proxy-middleware": "^0.19.1",
     "netlify-cli": "^2.15.0",
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^2.6.1"
   }
 }
